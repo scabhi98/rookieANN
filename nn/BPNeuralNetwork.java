@@ -1,4 +1,5 @@
 package nn;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,12 +9,14 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 	double learning_rate, momentum;
 	PerceptronLayer INPUT_LAYER;
 	PerceptronLayer OUTPUT_LAYER;
+	DataAdapter dataAdapter;
 	/**
 	 * 
 	 * @param layer_count
 	 * @param layer_strength_vector
 	 */
-	public BPNeuralNetwork(int layer_count, int layer_strength_vector[]) {
+	public BPNeuralNetwork(int layer_strength_vector[]) {
+		int layer_count = layer_strength_vector.length;
 		layers = new PerceptronLayer[layer_count];
 		for (int i = 0; i < layer_count; i++) 
 			layers[i] = new PerceptronLayer(layer_strength_vector[i]);
@@ -27,6 +30,13 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 		OUTPUT_LAYER = layers[layer_count - 1];
 		momentum = 0;
 		learning_rate = 0.5;
+	}
+
+	/**
+	 * @param dataAdapter the dataAdapter to set
+	 */
+	public void setDataAdapter(DataAdapter dataAdapter) {
+		this.dataAdapter = dataAdapter;
 	}
 	/**
 	 * @param learning_rate the learning_rate to set
@@ -103,6 +113,41 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 		}
 	}
 
+	public double[] testNetwork() 
+		throws InvalidArgumentVectorSize, InterruptedException, NoSuchLayerException, IOException 
+	{
+		List<double []> testInputs = dataAdapter.getTestInputList();
+		List<double []> testOutputs = dataAdapter.getTestOutputList();
+		double []errors = new double[testInputs.size()];
+		for (int i = 0; i < testInputs.size(); i++) {
+			double input[] = testInputs.get(i);
+			double output[] = testOutputs.get(i);
+			propagateInput(input);
+			double []calcOutput = getNetworkOutput();
+			for (int j = 0; j < calcOutput.length; j++) 
+				dataAdapter.printColumn(j, calcOutput[j]);
+			System.out.println("RMS ERROR: " + (errors[i] = rmsError(output,calcOutput)));
+		}
+		return errors;
+	}
+
+	public double[] trainNetwork()
+			throws InvalidArgumentVectorSize, InterruptedException, NoSuchLayerException, IOException {
+		List<double []> trainInputs = dataAdapter.getTrainingInputList();
+		List<double []> trainOutputs = dataAdapter.getTrainingOutputList();
+		double []errors = new double[trainInputs.size()];
+		for (int i = 0; i < trainInputs.size(); i++) {
+			double input[] = trainInputs.get(i);
+			double output[] = trainOutputs.get(i);
+			propagateInput(input);
+			calcAndBackPropagateError(output);
+			double []calcOutput = getNetworkOutput();
+			for (int j = 0; j < calcOutput.length; j++) 
+				dataAdapter.printColumn(j, calcOutput[j]);
+				System.out.println("RMS ERROR: " + (errors[i] = rmsError(output,calcOutput)));
+		}
+		return errors;
+	}
 	/**
 	 * 
 	 * @return

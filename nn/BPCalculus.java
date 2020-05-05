@@ -75,4 +75,15 @@ public interface BPCalculus {
         System.out.println("Error Calculated At "+ layer.getNode(host_node_pos)+" to "+dest_node_pos+" is "+ val);
         return val;
     }
+
+    default double rmsError(double actual[], double calculated[]) throws InvalidArgumentVectorSize {
+        double sum =0;
+        if(actual.length != calculated.length)
+            throw new InvalidArgumentVectorSize();
+        for (int i = 0; i < calculated.length; i++) {
+            double v = (actual[i] - calculated[i]);
+            sum += v*v;
+        }
+        return Math.sqrt(sum);
+    }
 }
