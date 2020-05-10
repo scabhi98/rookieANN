@@ -5,7 +5,7 @@ import java.util.function.Function;
 public class Perceptron implements Runnable {
 	String name;
 	PerceptronLayer prev_layer;
-	double activation, bias, link_weights[], delError, netInput;
+	double activation, bias, link_weights[], delError, netInput, lastWeightCorrection[], lastBiasCorrection;
 	Function <Double,Double> transferFunction;
 	public Perceptron() {
 		activation = bias = 0;
@@ -39,6 +39,34 @@ public class Perceptron implements Runnable {
 	 */
 	public void setTransferFunction(Function<Double, Double> transferFunction) {
 		this.transferFunction = transferFunction;
+	}
+
+	/**
+	 * @return the lastBiasCorrection
+	 */
+	public double getLastBiasCorrection() {
+		return lastBiasCorrection;
+	}
+	/**
+	 * @param lastBiasCorrection the lastBiasCorrection to set
+	 */
+	public void setLastBiasCorrection(double lastBiasCorrection) {
+		this.lastBiasCorrection = lastBiasCorrection;
+	}
+	/**
+	 * @param lastWeightCorrection the lastWeightCorrection to set
+	 */
+	public void setLastWeightCorrection(double[] lastWeightCorrection) {
+		this.lastWeightCorrection = lastWeightCorrection;
+		for (int i = 0; i < lastWeightCorrection.length; i++) {
+			this.lastWeightCorrection[i] = 0;
+		}
+	}
+	/**
+	 * @return the lastWeightCorrection
+	 */
+	public double[] getLastWeightCorrection() {
+		return lastWeightCorrection;
 	}
 
 	/**

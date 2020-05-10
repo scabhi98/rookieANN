@@ -1,6 +1,5 @@
 package nn;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +33,6 @@ public abstract class DataAdapter {
     public abstract String formattedOutputColumn(int columnPosition, double calcOutput);
 
     protected void generateLists() {
-        int rowWidth = inputColumnWidth + outputColumnWidth;
         try {
             Scanner sc = new Scanner(inputSourceStream);
             while (sc.hasNextLine()) {

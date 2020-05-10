@@ -22,7 +22,7 @@ public class DriverProgram {
 		int totCount = 0, totCorr = 0, inptSize;
 		final double errAllowed = (double) 0.1;
 		// TODO Auto-generated method stub
-		final int layer_strengths[] = { 12, 24, 50,25, 5, 1 };
+		final int layer_strengths[] = { 1, 8, 8, 1 };
 		BPNeuralNetwork network = new BPNeuralNetwork(layer_strengths) {
 			@Override
 			public double transferFunc(final double x) {
@@ -37,13 +37,13 @@ public class DriverProgram {
 			}
 		};
 		network.setLearning_rate(0.5);
-		network.setMomentum(0);
+		network.setMomentum(0.02);
 
-		File inpFile = new File("Churn_Modelling.csv"), oFile = new File("outFile");
+		File inpFile = new File("sinFunction.csv"), oFile = new File("outFile");
 
 		MyAdapter dAdapter;
 		try {
-			dAdapter = new MyAdapter(new FileInputStream(inpFile), new FileOutputStream(oFile), 12, 1);
+			dAdapter = new MyAdapter(new FileInputStream(inpFile), new FileOutputStream(oFile), 1, 1);
 			// dAdapter.setRestrictedDataSize(5000);
 			network.setDataAdapter(dAdapter);
 			network.configAllInitialValuesToRandom();
@@ -105,29 +105,29 @@ class MyAdapter extends DataAdapter {
 	public void normalizeInputRow(String row, double[] inputs, double[] outputs) {
 		Scanner sc = new Scanner(row);
 		sc.useDelimiter(",");
-		System.out.print(sc.next()+ " ");
-		System.out.print(sc.next()+ " ");
-		System.out.print(sc.next()+ " ");
-		inputs[0] = min_max_normalization(Double.valueOf(sc.next()), 350, 850);
-		String country = sc.next();
-		inputs[1] = country.equals("Germany") ? 1 : 0;
-		inputs[2] = country.equals("France") ? 1 : 0;
-		inputs[3] = country.equals("Spain") ? 1 : 0;
-		String gender = sc.next();
-		inputs[4] = gender.equals("Male") ? 1 : -1;
-		inputs[5] = min_max_normalization(Double.valueOf(sc.next()), 18, 92);
-		inputs[6] = min_max_normalization(Double.valueOf(sc.next()), 0, 10);
-		inputs[7] = min_max_normalization(Double.valueOf(sc.next()), 0, 250898.09);
-		inputs[8] = min_max_normalization(Double.valueOf(sc.next()), 1, 4);
-		inputs[9] = Double.valueOf(sc.next());
-		inputs[10] = Double.valueOf(sc.next());
-		inputs[11] = min_max_normalization(Double.valueOf(sc.next()), 11.58, 199992.48);
-		if(sc.hasNext())
+		// System.out.print(sc.next()+ " ");
+		// System.out.print(sc.next()+ " ");
+		// System.out.print(sc.next()+ " ");
+		inputs[0] = min_max_normalization(Double.valueOf(sc.next()), -180, 180);
+		// String country = sc.next();
+		// inputs[1] = country.equals("Germany") ? 1 : 0;
+		// inputs[2] = country.equals("France") ? 1 : 0;
+		// inputs[3] = country.equals("Spain") ? 1 : 0;
+		// String gender = sc.next();
+		// inputs[4] = gender.equals("Male") ? 1 : -1;
+		// inputs[5] = min_max_normalization(Double.valueOf(sc.next()), 18, 92);
+		// inputs[6] = min_max_normalization(Double.valueOf(sc.next()), 0, 10);
+		// inputs[7] = min_max_normalization(Double.valueOf(sc.next()), 0, 250898.09);
+		// inputs[8] = min_max_normalization(Double.valueOf(sc.next()), 1, 4);
+		// inputs[9] = Double.valueOf(sc.next());
+		// inputs[10] = Double.valueOf(sc.next());
+		// inputs[11] = min_max_normalization(Double.valueOf(sc.next()), 11.58, 199992.48);
+		// if(sc.hasNext())
 		outputs[0] = Double.valueOf(sc.next());
-		// System.out.println(sc.next());
-		// while(sc.hasNext()){
-		// 	System.out.println(sc.next());
-		// }
+		// // System.out.println(sc.next());
+		// // while(sc.hasNext()){
+		// // 	System.out.println(sc.next());
+		// // }
 		sc.close();
 	}
 	

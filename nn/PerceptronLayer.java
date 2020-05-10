@@ -141,6 +141,8 @@ public class PerceptronLayer {
 				nodes[i].setActivation(activation[i]);
 				nodes[i].setBias(bias[i]);
 				nodes[i].setTransferFunction(transferFunction);	
+				nodes[i].setLastWeightCorrection(new double[w.length]);
+				nodes[i].setLastBiasCorrection(0);
 			}
 		}
 		else

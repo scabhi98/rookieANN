@@ -124,8 +124,12 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 			double output[] = testOutputs.get(i);
 			propagateInput(input);
 			double []calcOutput = getNetworkOutput();
-			for (int j = 0; j < calcOutput.length; j++) 
+			for (int j = 0; j < calcOutput.length; j++) {
+				dataAdapter.printColumn(j, output[j]);
+				System.out.println(output[j]);
 				dataAdapter.printColumn(j, calcOutput[j]);
+			}
+				
 			System.out.println("RMS ERROR: " + (errors[i] = rmsError(output,calcOutput)));
 		}
 		return errors;
@@ -140,11 +144,16 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 			double input[] = trainInputs.get(i);
 			double output[] = trainOutputs.get(i);
 			propagateInput(input);
+			
 			calcAndBackPropagateError(output);
 			double []calcOutput = getNetworkOutput();
-			for (int j = 0; j < calcOutput.length; j++) 
+			for (int j = 0; j < calcOutput.length; j++) {
 				dataAdapter.printColumn(j, calcOutput[j]);
-				System.out.println("RMS ERROR: " + (errors[i] = rmsError(output,calcOutput)));
+				dataAdapter.printColumn(j, output[j]);
+				System.out.println(output[j]);
+			}
+				
+			System.out.println("RMS ERROR: " + (errors[i] = rmsError(output,calcOutput)));
 		}
 		return errors;
 	}
@@ -182,7 +191,7 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 		double outputError[] = new double[targetOutput.length];
 		/*Calculation of Error at Output Layer*/
 		for (int i = 0; i < targetOutput.length; i++) {
-		   outputError[i]	= errorToOutputDeriv(i, OUTPUT_LAYER, targetOutput[i]);
+		   outputError[i]	= calcDelErrorAtOutputLayer(i, OUTPUT_LAYER, targetOutput[i]);
 //		   Perceptron node = OUTPUT_LAYER.getNode(i);
 //		   double biasCorr = errorToBiasDeriv(i,OUTPUT_LAYER);
 //			biasCorr = biasCorr *learning_rate - momentum * node.getBias();
@@ -193,14 +202,18 @@ public abstract class BPNeuralNetwork implements BPCalculus{
 			PerceptronLayer workingLayer = layers[i];
 			for(int j = 0; j<workingLayer.getNodesCount(); j++){
 				Perceptron node =  workingLayer.getNode(j);
-				for (int k =0; k<workingLayer.getPrevLayer().getNodesCount(); k++){
+				PerceptronLayer prevLayer = workingLayer.getPrevLayer();
+				for (int k =0; k<prevLayer.getNodesCount(); k++){
 					double corr = errorToWeightDeriv(j, k, workingLayer);
-					node.getLink_weights()[k] -= learning_rate * corr - momentum *node.getLink_weights()[k];
+					node.getLink_weights()[k] -= (corr  = learning_rate * corr * prevLayer.getNode(k).getActivation() +
+					momentum * node.getLastWeightCorrection()[k]);
+					node.getLastWeightCorrection()[k] = corr;
 					System.out.println("Weight of " + node + " at " + k + " is corrected to: " + node.getLink_weights()[k]);
 				}
 				double biasCorr = errorToBiasDeriv(j,workingLayer);
-				biasCorr = biasCorr *learning_rate - momentum * node.getBias();
+				biasCorr = biasCorr *learning_rate + momentum * node.getLastBiasCorrection();
 				node.setBias(node.getBias() - biasCorr);
+				node.setLastBiasCorrection(biasCorr);
 				System.out.println("Bias of "+node+" is corrected to: "+node.getBias());
 			}
 		}

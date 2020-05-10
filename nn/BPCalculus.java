@@ -6,27 +6,28 @@ public interface BPCalculus {
    
     abstract double transferDeriv(double x) ;
    
-    default double errorToOutputDeriv(int node_pos, PerceptronLayer layer , double targetValue){
-        double v = 2*(layer.getNode(node_pos).getActivation() - targetValue);
+    default double calcDelErrorAtOutputLayer(int node_pos, PerceptronLayer layer , double targetValue){
+        double x = layer.getNode(node_pos).getActivation();
+        double v = (x - targetValue) * x * (1 -  x);
         layer.getNode(node_pos).setDelError(v);
-        System.out.println("Error Calculated at "+ layer.getNode(node_pos)+ " is "+v);
+        System.out.println("Del Error Function Calculated at "+ layer.getNode(node_pos)+ " is "+v);
         return v;
     }
    
-    default double inputToWeightDeriv(int host_node_pos, int dest_node_pos, PerceptronLayer layer)
-            throws NoSuchLayerException {
-        if (layer.getPrevLayer() == null)
-            throw new NoSuchLayerException();
-        return layer.getPrevLayer().getNode(dest_node_pos).getActivation();
-    }
+    // default double inputToWeightDeriv(int host_node_pos, int dest_node_pos, PerceptronLayer layer)
+    //         throws NoSuchLayerException {
+    //     if (layer.getPrevLayer() == null)
+    //         throw new NoSuchLayerException();
+    //     return layer.getPrevLayer().getNode(dest_node_pos).getActivation();
+    // }
    
-    default double activationToInputDeriv(int node_pos, PerceptronLayer layer){
-        return transferDeriv(layer.getNode(node_pos).getActivation());
-    }
+    // default double activationToInputDeriv(int node_pos, PerceptronLayer layer){
+    //     return transferDeriv(layer.getNode(node_pos).getActivation());
+    // }
    
-    default double inputToActivationDeriv(int host_node_pos, int dest_node_pos, PerceptronLayer layer){
-        return layer.getNode(host_node_pos).getLink_weights()[dest_node_pos];
-    }
+    // default double inputToActivationDeriv(int host_node_pos, int dest_node_pos, PerceptronLayer layer){
+    //     return layer.getNode(host_node_pos).getLink_weights()[dest_node_pos];
+    // }
    
     default double errorToActivationDeriv(int host_node_pos, PerceptronLayer layer){
         if(layer.getNextLayer() == null)
@@ -42,19 +43,19 @@ public interface BPCalculus {
     }
     
     default double errorToBiasDeriv(int host_node_pos, PerceptronLayer layer) {
-    	double val=0;
+        double val=0;
+        Perceptron node = layer.getNode(host_node_pos);
     	if(layer.getNextLayer() == null) {
-    		Perceptron node = layer.getNode(host_node_pos);
-    		val = transferDeriv(node.getActivation()) * node.getDelError();
+    		val = node.getDelError();
     	}
     	else {
     		PerceptronLayer layer2 = layer.getNextLayer();
     		for(int i=0; i< layer2.getNodesCount();i++){
-                Perceptron node = layer2.getNode(i);
-                val += transferDeriv(node.getNetInput()) * node.getDelError();
+                Perceptron node2 = layer2.getNode(i);
+                val +=  node2.getDelError();
             }
     	}
-    	return val;
+    	return transferDeriv(node.getNetInput()) * val;
     }
 
     default double errorToWeightDeriv(int host_node_pos, int dest_node_pos, PerceptronLayer layer)
@@ -62,15 +63,17 @@ public interface BPCalculus {
         double val = 0;
         if(layer.getNextLayer() == null){
             val = 
-                inputToWeightDeriv(host_node_pos, dest_node_pos, layer)*
-                activationToInputDeriv(host_node_pos, layer)*
+                // inputToWeightDeriv(host_node_pos, dest_node_pos, layer)*
+                // activationToInputDeriv(host_node_pos, layer)*
                 layer.getNode(host_node_pos).getDelError();
+
         }
         else{
             val = 
-                inputToWeightDeriv(host_node_pos, dest_node_pos, layer)*
-                activationToInputDeriv(host_node_pos, layer)*
-                errorToActivationDeriv(host_node_pos, layer);                
+                // inputToWeightDeriv(host_node_pos, dest_node_pos, layer)*
+                // activationToInputDeriv(host_node_pos, layer)*
+                // errorToActivationDeriv(host_node_pos, layer);                
+                delError(host_node_pos, layer); 
         }
         System.out.println("Error Calculated At "+ layer.getNode(host_node_pos)+" to "+dest_node_pos+" is "+ val);
         return val;
@@ -85,5 +88,21 @@ public interface BPCalculus {
             sum += v*v;
         }
         return Math.sqrt(sum);
+    }
+
+    default double delError(int pos, PerceptronLayer layer) throws NoSuchLayerException {
+        if (layer.getNextLayer() == null) {
+            throw new NoSuchLayerException();
+        } else {
+            double x = layer.getNode(pos).getActivation(), sum = 0;
+            PerceptronLayer layer2 = layer.getNextLayer();
+            for(int i=0; i< layer2.getNodesCount();i++){
+                Perceptron node = layer2.getNode(i);
+                sum += node.getLink_weights()[pos] * node.getDelError();
+            }
+            double err = sum * x * (1-x);
+            layer.getNode(pos).setDelError(err);
+            return err;
+        }
     }
 }
