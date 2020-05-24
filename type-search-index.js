@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"nn","l":"BPCalculus"},{"p":"nn","l":"BPNeuralNetwork"},{"p":"nn","l":"DataAdapter"},{"p":"nn","l":"InvalidArgumentVectorSize"},{"p":"nn","l":"NoSuchLayerException"},{"p":"nn","l":"Perceptron"},{"p":"nn","l":"PerceptronLayer"}]
