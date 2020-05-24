@@ -64,7 +64,7 @@ public class PerceptronLayer {
 		return nodes[position];
 	}
 
-	public Thread [] runLayer(){
+	Thread [] runLayer(){
 		Thread [] nodeThreads = new Thread[nodes.length];
 		for (int i = 0; i < nodeThreads.length; i++) {
 			nodeThreads[i] = new Thread(nodes[i]);
@@ -72,18 +72,14 @@ public class PerceptronLayer {
 		}
 		return nodeThreads;
 	}
-	/**
-	 * 
-	 * @throws InterruptedException
-	 */
-	public void waitForLayerThreads(Thread threads[]) throws InterruptedException {
+	void waitForLayerThreads(Thread threads[]) throws InterruptedException {
 		for (Thread perceptron : threads) 
 			perceptron.join();
 	}
 	/**
-	 * 
-	 * @param input
-	 * @throws InvalidArgumentVectorSize
+	 * Feeds the input values to the perceptrons in this layer.
+	 * @param input vector of input values.
+	 * @throws InvalidArgumentVectorSize on mismatch size of the parameter and layer nodes count.
 	 */
 	public void feedInputActivation(double []input) throws InvalidArgumentVectorSize {
 		if(input.length == nodes.length){
@@ -93,11 +89,18 @@ public class PerceptronLayer {
 		else
 			throw new InvalidArgumentVectorSize();
 	}
+	/**
+	 * Invokes all the perceptrons in the layer and wait for their completion to gain the final output
+	 * @throws InterruptedException on interruption of any running perceptron in the layer.
+	 */
 	
 	public void calcLayerOutput() throws InterruptedException {
 		waitForLayerThreads(runLayer());
 	}
-	
+	/**
+	 * Retrieves the activation i.e. output value of each node as a vector for this layer.
+	 * @return vector of floating point values representing output values of each node of this layer.
+	 */
 	public double [] getLayerOutput() {
 		double [] output = new double[nodes.length];
 		for (int i = 0; i < output.length; i++) 
@@ -121,10 +124,12 @@ public class PerceptronLayer {
 	}
 	
 	/**
-	 * @throws InvalidArgumentVectorSize: If vector sizes do not matches with nodes count.
+	 * @throws InvalidArgumentVectorSize If vector sizes do not matches with nodes count.
 	 * @param weights is List of double[] that takes weight vector for each node
 	 * @param activation is double vector to initialize activation value of each node
 	 * @param bias is double vector to initialize bias value of each node.
+	 * @param transferFunction is transfer Function definition for each node.
+	 * @throws InvalidArgumentVectorSize if any of the argument vector size differs with the corresponding layer configuration.
 	 * */
 	
 	public void init_nodes(List<double []> weights, double activation[], double bias[], Function<Double,Double> transferFunction) 
