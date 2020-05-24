@@ -19,10 +19,6 @@ class DLBCLAdapter extends DataAdapter {
 		return " Confused ";
 	}
 
-	double min_max_normalization(double value, double min, double max){
-		return (value - min) / (max - min);
-	}
-
 	@Override
 	public void normalizeInputRow(String row, double[] inputs, double[] outputs) {
 		Scanner sc = new Scanner(row);

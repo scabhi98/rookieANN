@@ -30,51 +30,40 @@ You need to define two abstract functions, ```normalizeInputRow()``` to get a no
 Example
 
 ```java
-class MyAdapter extends DataAdapter {
+class DLBCLAdapter extends DataAdapter {
 
-	public MyAdapter(final InputStream inputStream, final OutputStream outputStream, final int inputColumnWidth, final int outputColumnWidth) {
+	public DLBCLAdapter(final InputStream inputStream, final OutputStream outputStream, final int inputColumnWidth, final int outputColumnWidth) {
 		super(inputStream, outputStream, inputColumnWidth, outputColumnWidth);
 	}
 
 	@Override
-	public String formattedOutputColumn(int columnPosition, double calcOutput) {
-		if(columnPosition == 0){
-			return String.valueOf(calcOutput);
-		}
-		return null;
-	}
-
-	double min_max_normalization(double value, double min, double max){
-		return (value - min) / (max - min);
+	public String formatOutput(double []output){
+		if((output[0] > 0.7 && output[1] < 0.2 ) || output[0] > 0.9)
+			return " FL ";
+		if((output[0] < 0.2 && output[1] > 0.7) || output[1] > 0.9 )
+			return " DLBCL ";
+		return " Confused ";
 	}
 
 	@Override
 	public void normalizeInputRow(String row, double[] inputs, double[] outputs) {
 		Scanner sc = new Scanner(row);
 		sc.useDelimiter(",");
-		System.out.print(sc.next()+ " ");
-		System.out.print(sc.next()+ " ");
-		System.out.print(sc.next()+ " ");
-		inputs[0] = min_max_normalization(Double.valueOf(sc.next()), 350, 850);
-		String country = sc.next();
-		inputs[1] = country.equals("Germany") ? 1 : 0;
-		inputs[2] = country.equals("France") ? 1 : 0;
-		inputs[3] = country.equals("Spain") ? 1 : 0;
-		String gender = sc.next();
-		inputs[4] = gender.equals("Male") ? 1 : -1;
-		inputs[5] = min_max_normalization(Double.valueOf(sc.next()), 18, 92);
-		inputs[6] = min_max_normalization(Double.valueOf(sc.next()), 0, 10);
-		inputs[7] = min_max_normalization(Double.valueOf(sc.next()), 0, 250898.09);
-		inputs[8] = min_max_normalization(Double.valueOf(sc.next()), 1, 4);
-		inputs[9] = Double.valueOf(sc.next());
-		inputs[10] = Double.valueOf(sc.next());
-		inputs[11] = min_max_normalization(Double.valueOf(sc.next()), 11.58, 199992.48);
-		if(sc.hasNext())
-		outputs[0] = Double.valueOf(sc.next());
-		// System.out.println(sc.next());
-		// while(sc.hasNext()){
-		// 	System.out.println(sc.next());
-		// }
+		
+		for (int i = 0; i < inputs.length; i++) 
+			inputs[i] = Double.valueOf(sc.next());
+		
+		switch(sc.next()){
+			case "DLBCL":
+				outputs[0] = 0;
+				outputs[1] = 1;
+				break;
+			case "FL":
+				outputs[0] = 1;
+				outputs[1] = 0;
+				break;
+		}
+		
 		sc.close();
 	}
 	
@@ -90,7 +79,7 @@ Instantiate extended DataAdapter class and pass the following parameters
 then set a partition ratio for the dataset. Default is 0.65 i.e. 65%.
 
 ```java
-	MyAdapter dAdapter = new MyAdapter(new FileInputStream(inpFile), new FileOutputStream(oFile), 12, 1);
+	DataAdapter dAdapter = new DLBCLAdapter(new FileInputStream(inpFile), new FileOutputStream(oFile), 12, 1);
 	dAdapter.setPartitionRatio((float)0.7);
 ```
 
